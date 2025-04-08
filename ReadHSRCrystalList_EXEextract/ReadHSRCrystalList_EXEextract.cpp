@@ -25,9 +25,9 @@ int main(int argc, char* argv[]) {
     file.close();
 
     // The target string to find
-    std::string targetVALUE = "class=\"record-item__content-right__value\">";
-    std::string targetDATE = "class=\"record-item__content-right__date\">";
-    std::string targetTYPE = "class=\"record-item__content-left__text\">";
+    const std::string targetVALUE = "class=\"record-item__content-right__value\">";
+    const std::string targetDATE = "class=\"record-item__content-right__date\">";
+    const std::string targetTYPE = "class=\"record-item__content-left__text\">";
     std::vector<std::string> valuesVALUE, valuesDATE, valuesTYPE;
 
     size_t pos = 0;
