@@ -2,6 +2,7 @@
 #include <fstream>  // For file input
 #include <string>
 #include <vector>
+#include <algorithm>
 
 int main(int argc, char* argv[]) {
     // Check for proper usage
@@ -30,6 +31,7 @@ int main(int argc, char* argv[]) {
     const std::string targetTYPE = "class=\"record-item__content-left__text\">";
     std::vector<std::string> valuesVALUE, valuesDATE, valuesTYPE;
 
+    // find starting pos, extract the data that's to the right of it
     size_t pos = 0;
     while ((pos = html.find(targetVALUE, pos)) != std::string::npos) {
         size_t start = pos + targetVALUE.length();
@@ -40,7 +42,6 @@ int main(int argc, char* argv[]) {
         }
         else break;
     }
-
     pos = 0;
     while ((pos = html.find(targetDATE, pos)) != std::string::npos) {
         size_t start = pos + targetDATE.length();
@@ -51,7 +52,6 @@ int main(int argc, char* argv[]) {
         }
         else break;
     }
-
     pos = 0;
     while ((pos = html.find(targetTYPE, pos)) != std::string::npos) {
         size_t start = pos + targetTYPE.length();
@@ -66,24 +66,26 @@ int main(int argc, char* argv[]) {
     std::ofstream outputFileVALUE("outputVALUE.txt");
     std::ofstream outputFileDATE("outputDATE.txt");
     std::ofstream outputFileTYPE("outputTYPE.txt");
+    std::ofstream outputFileEXCEL("outputEXCEL.csv");
 
-    if (!outputFileVALUE || !outputFileDATE || !outputFileTYPE) {
+    if (!outputFileVALUE || !outputFileDATE || !outputFileTYPE || !outputFileEXCEL) {
         std::cerr << "Failed to open one of the output files.\n";
         return 1;
     }
-
-    for (const auto& val : valuesVALUE) {
-        std::cout << "Extracted: " << val << '\n';
-        outputFileVALUE << val << '\n';
+    if (valuesVALUE.size() != valuesDATE.size() || valuesVALUE.size() != valuesTYPE.size() || valuesDATE.size() != valuesTYPE.size()) {
+        std::cerr << "Warning, length of three files don't match, data may misallign." << std::endl;
     }
-    for (const auto& val : valuesDATE) {
-        std::cout << "Extracted: " << val << '\n';
-        outputFileDATE << val << '\n';
+    // Force the compiler to build this string as UTF-8
+    outputFileEXCEL << "\xEF\xBB\xBF";
+    outputFileEXCEL << (const char*)u8"星穹,日期,获取方式" << '\n';
+    for (size_t i = 0; i < std::min({ valuesVALUE.size(), valuesDATE.size(), valuesTYPE.size() }); i++) {
+        std::cout << "Extracted: " << valuesVALUE[i] << '\n';
+        std::cout << "Extracted: " << valuesDATE[i] << '\n';
+        std::cout << "Extracted: " << valuesTYPE[i] << '\n';
+        outputFileVALUE << valuesVALUE[i] << '\n';
+        outputFileDATE << valuesDATE[i] << '\n';
+        outputFileTYPE << valuesTYPE[i] << '\n';
+        outputFileEXCEL << valuesVALUE[i] << ',' << valuesDATE[i] << ',' << valuesTYPE[i] << '\n';
     }
-    for (const auto& val : valuesTYPE) {
-        std::cout << "Extracted: " << val << '\n';
-        outputFileTYPE << val << '\n';
-    }
-
     return 0;
 }
